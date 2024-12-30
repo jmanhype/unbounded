@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/unbounded_db
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - OLLAMA_API_URL=http://host.docker.internal:11434
+      - MODEL_NAME=llama2
+      - ENVIRONMENT=development
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - AIDER_OPENAI_API_BASE=https://api.deepseek.com
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - BFL_API_KEY=${BFL_API_KEY}
+      - REPLICATE_API_KEY=${REPLICATE_API_KEY}
+      - STABILITY_API_KEY=${STABILITY_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MEM0_API_KEY=${MEM0_API_KEY}
+      - MEMORY_EMBEDDINGS_MODEL=text-embedding-ada-002
+      - MEMORY_STORAGE_TYPE=local
+      - MEMORY_STORAGE_PATH=./data/memories
+    volumes:
+      - ../../mem0:/app/mem0
+    depends_on:
+      - db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-unbounded_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data: 
