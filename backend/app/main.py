@@ -2,6 +2,7 @@
 from dotenv import load_dotenv
 import os
 import asyncio
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Load environment variables from .env file
@@ -15,13 +16,15 @@ from .routers import auth, characters, images, users, backstories, game_states, 
 from . import models
 from .database import engine, Base
 
+logger = logging.getLogger(__name__)
+
 # Create database tables asynchronously
 async def init_db():
     """Initialize database by dropping all tables and recreating them."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        print("Database tables dropped and recreated successfully")
+        logger.info("Database tables dropped and recreated successfully")
 
 # Create event handler for startup
 async def start_app():

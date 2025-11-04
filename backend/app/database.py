@@ -8,11 +8,13 @@ import logging
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/unbounded_db")
 ASYNC_DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
-print(f"Connecting to database at: {ASYNC_DATABASE_URL}")
+logger.info("Database connection initialized")
 
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
